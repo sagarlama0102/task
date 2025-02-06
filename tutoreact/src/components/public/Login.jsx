@@ -1,0 +1,336 @@
+// import React, { useState } from "react";
+// import { useForm } from "react-hook-form";
+// import "./Login.css";
+
+// const Login = () => {
+  
+//   const {
+//     register,
+//     handleSubmit,
+//     formState: { errors },
+//   } = useForm();
+
+//   const [isLogin, setIsLogin] = useState(true);
+
+//   const toggleForm = () => {
+//     setIsLogin(!isLogin);
+//   };
+
+//   return (
+//     <div className="Main-container">
+//     <div className={`container ${isLogin ? "active" : ""}`}>
+//       <div className="form-box login">
+//         <form onSubmit={handleSubmit((data) => console.log(data))}>
+//           <h1>Login</h1>
+//           <div className="input-box">
+//             <input
+//               type="text"
+//               placeholder="Username"
+//               {...register("username", {
+//                 required: "Username is required",
+//                 minLength: { value: 4, message: "Minimum length is 4" },
+//               })}
+//             />
+//             <i className="bx bxs-user"></i>
+//           </div>
+//           <div className="error-container">
+//             {errors.username && <p className="error">{errors.username.message}</p>}
+//           </div>
+//           <div className="input-box">
+//             <input
+//               type="password"
+//               placeholder="Password"
+//               {...register("password", {
+//                 required: "Password is required",
+//                 minLength: { value: 6, message: "Minimum length is 6" },
+//                 pattern: {
+//                   value: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]+$/,
+//                   message: "Password must include letter and numbers",
+//                 },
+//               })}
+//             />
+//             <i className="bx bxs-lock-alt"></i>
+//           </div>
+//           <div className="error-container">
+//             {errors.password && <p className="error">{errors.password.message}</p>}
+//           </div>
+//           <div className="forget-link">
+//             <a href="#">Forgot password?</a>
+//           </div>
+//           <button type="submit" className="btn">Login</button>
+//         </form>
+//       </div>
+
+//       <div className="form-box register">
+//         <form onSubmit={handleSubmit((data) => console.log(data))}>
+//           <h1>Register Now!</h1>
+//           <div className="input-box">
+//             <input
+//               type="text"
+//               placeholder="Username"
+//               {...register("username", {
+//                 required: "Username is required",
+//                 minLength: { value: 4, message: "Minimum length is 4" },
+//                 pattern: {
+//                   value: /^[A-Za-z0-9]+$/,
+//                   message: "Only letters and numbers allowed",
+//                 },
+//               })}
+//             />
+//             <i className="bx bxs-user"></i>
+//           </div>
+//           <div className="input-box">
+//             <input
+//               type="email"
+//               placeholder="Email"
+//               {...register("email", {
+//                 required: "Email is required",
+//                 pattern: {
+//                   value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+//                   message: "Invalid email",
+//                 },
+//               })}
+//             />
+//             <i className="bx bxs-envelope"></i>
+//           </div>
+//           <div className="input-box">
+//             <input
+//               type="password"
+//               placeholder="Password"
+//               {...register("password", {
+//                 required: "Password is required",
+//                 minLength: { value: 6, message: "Minimum length is 6" },
+//                 pattern: {
+//                   value: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]+$/,
+//                   message: "Password must include letter and numbers",
+//                 },
+//               })}
+//             />
+//             <i className="bx bxs-lock-alt"></i>
+//           </div>
+//           <div className="input-box">
+//             <input
+//               type="password"
+//               placeholder="Confirm Password"
+//               {...register("confirmPassword", {
+//                 required: "Confirm Password is required",
+//                 validate: (value) =>
+//                   value === watch("password") || "The passwords do not match",
+//               })}
+//             />
+//             <i className="bx bxs-lock-alt"></i>
+//           </div>
+//           <button type="submit" className="btn">Sign Up</button>
+//         </form>
+//       </div>
+
+//       <div className="toggle-box">
+//         <div className="toggle-panel toggle-left">
+//           <h1>Welcome to TaskHub</h1>
+//           <p>Don't have an account?</p>
+//           <button className="btn register-btn" onClick={toggleForm}>
+//             Register
+//           </button>
+//         </div>
+//         <div className="toggle-panel toggle-right">
+//           <h1>Welcome Back!</h1>
+//           <p>Already have an account?</p>
+//           <button className="btn login-btn" onClick={toggleForm}>
+//             Login
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//     </div>
+//   );
+// };
+
+// export default Login;
+
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import "./Login.css";
+
+const Login = () => {
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm();
+
+  const [isLogin, setIsLogin] = useState(true);
+
+  const toggleForm = () => {
+    setIsLogin(!isLogin);
+  };
+
+  const onSubmitLogin = (data) => {
+    console.log("Login Data:", data);
+    alert(`Login Successful: ${JSON.stringify(data)}`);
+  };
+
+  const onSubmitRegister = (data) => {
+    console.log("Registration Data:", data);
+    alert(`Registration Successful: ${JSON.stringify(data)}`);
+  };
+
+  return (
+    <div className="Main-container">
+      <div className={`container ${isLogin ? "active" : ""}`}>
+        {/* Login Form */}
+        <div className="form-box login">
+          <form onSubmit={handleSubmit(onSubmitLogin)}>
+            <h1>Login</h1>
+            <div className="input-box">
+              <input
+                type="text"
+                placeholder="Username"
+                {...register("username", {
+                  required: "Username is required",
+                  minLength: { value: 4, message: "Minimum length is 4" },
+                })}
+              />
+              <i className="bx bxs-user"></i>
+            </div>
+            <div className="error-container">
+              {errors.username && (
+                <p className="error">{errors.username.message}</p>
+              )}
+            </div>
+            <div className="input-box">
+              <input
+                type="password"
+                placeholder="Password"
+                {...register("password", {
+                  required: "Password is required",
+                  minLength: { value: 6, message: "Minimum length is 6" },
+                  pattern: {
+                    value: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]+$/,
+                    message: "Password must include letters and numbers",
+                  },
+                })}
+              />
+              <i className="bx bxs-lock-alt"></i>
+            </div>
+            <div className="error-container">
+              {errors.password && (
+                <p className="error">{errors.password.message}</p>
+              )}
+            </div>
+            <div className="forget-link">
+              <a href="#">Forgot password?</a>
+            </div>
+            <button type="submit" className="btn">
+              Login
+            </button>
+          </form>
+        </div>
+
+        {/* Registration Form */}
+        <div className="form-box register">
+          <form onSubmit={handleSubmit(onSubmitRegister)}>
+            <h1>Register Now!</h1>
+            <div className="input-box">
+              <input
+                type="text"
+                placeholder="Username"
+                {...register("username", {
+                  required: "Username is required",
+                  minLength: { value: 4, message: "Minimum length is 4" },
+                  pattern: {
+                    value: /^[A-Za-z0-9]+$/,
+                    message: "Only letters and numbers allowed",
+                  },
+                })}
+              />
+              <i className="bx bxs-user"></i>
+            </div>
+            <div className="error-container">
+              {errors.username && (
+                <p className="error">{errors.username.message}</p>
+              )}
+            </div>
+            <div className="input-box">
+              <input
+                type="email"
+                placeholder="Email"
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                    message: "Invalid email address",
+                  },
+                })}
+              />
+              <i className="bx bxs-envelope"></i>
+            </div>
+            <div className="error-container">
+              {errors.email && <p className="error">{errors.email.message}</p>}
+            </div>
+            <div className="input-box">
+              <input
+                type="password"
+                placeholder="Password"
+                {...register("password", {
+                  required: "Password is required",
+                  minLength: { value: 6, message: "Minimum length is 6" },
+                  pattern: {
+                    value: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]+$/,
+                    message: "Password must include letters and numbers",
+                  },
+                })}
+              />
+              <i className="bx bxs-lock-alt"></i>
+            </div>
+            <div className="error-container">
+              {errors.password && (
+                <p className="error">{errors.password.message}</p>
+              )}
+            </div>
+            <div className="input-box">
+              <input
+                type="password"
+                placeholder="Confirm Password"
+                {...register("confirmPassword", {
+                  required: "Confirm Password is required",
+                  validate: (value) =>
+                    value === watch("password") || "The passwords do not match",
+                })}
+              />
+              <i className="bx bxs-lock-alt"></i>
+            </div>
+            <div className="error-container">
+              {errors.confirmPassword && (
+                <p className="error">{errors.confirmPassword.message}</p>
+              )}
+            </div>
+            <button type="submit" className="btn">
+              Sign Up
+            </button>
+          </form>
+        </div>
+
+        {/* Toggle Section */}
+        <div className="toggle-box">
+          <div className="toggle-panel toggle-left">
+            <h1>Welcome to TaskHub</h1>
+            <p>Don't have an account?</p>
+            <button className="btn register-btn" onClick={toggleForm}>
+              Register
+            </button>
+          </div>
+          <div className="toggle-panel toggle-right">
+            <h1>Welcome Back!</h1>
+            <p>Already have an account?</p>
+            <button className="btn login-btn" onClick={toggleForm}>
+              Login
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Login;

@@ -1,0 +1,232 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  width: 100%;
+} */
+
+.content {
+  /* margin-left: 250px; */
+  padding: 20px;
+  width: 100%;
+}
+
+/* Kanban Board CSS */
+.kanban-board {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  gap: 20px;
+  flex-wrap: wrap;
+  
+}
+
+.kanban-column {
+  width: 30%;
+  background-color: #f1f8ff;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+.kanban-column h2 {
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  color: #095cb5;
+  margin-bottom: 15px;
+}
+
+.kanban-task {
+  background-color: #fff;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  font-family: 'Poppins', sans-serif;
+  color: #333;
+  cursor: grab;
+}
+
+.kanban-task:hover {
+  background-color: #f9f9f9;
+}
+
+/* Scrollbar Styling */
+.kanban-column::-webkit-scrollbar {
+  width: 8px;
+}
+
+.kanban-column::-webkit-scrollbar-thumb {
+  background-color: #095cb5;
+  border-radius: 8px;
+}
+
+.add-task-btn {
+  background-color: #095cb5;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  margin-right: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.add-task-btn:hover {
+  background-color: #063a79;
+}
+
+.add-task-btn i {
+  margin-right: 8px;
+  margin-top: 3px;
+  font-size: 16px;
+}
+
+.notification-btn {
+  background-color: #fff;
+  color: #095cb5;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  border: 2px solid #095cb5;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.3s ease;
+}
+
+.notification-btn:hover {
+  background-color: #095cb5;
+  color: #fff;
+}
+
+.notification-btn i {
+  margin-right: 5px;
+  font-size: 16px;
+}
+
+.top-right-buttons {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+  padding-right: 20px;
+}
+
+/* Form Modal Styles */
+.form-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.form-content {
+  background-color: #f1f8ff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+}
+
+.form-content h2 {
+  margin-bottom: 20px;
+}
+
+.form-content label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.form-content input,
+.form-content textarea,
+.form-content select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.form-content button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.form-content button[type="submit"] {
+  background-color: #095cb5;
+  color: #fff;
+}
+
+.form-content button[type="button"] {
+  background-color: #ccc;
+  color: #000;
+}
+
+
+
+
+@media (max-width: 768px) {
+  /* .content {
+    margin-left: 200px;
+  } */
+  .kanban-board {
+    flex-direction: column;
+  }
+  .kanban-column {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  .top-right-buttons {
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  .add-task-btn,
+  .notification-btn {
+    margin-bottom: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* .content {
+    margin-left: 100px;
+  } */
+  .kanban-task {
+    font-size: 12px;
+    padding: 8px;
+  }
+  .add-task-btn,
+  .notification-btn {
+    font-size: 12px;
+    padding: 8px 15px;
+  }
+  .add-task-btn i,
+  .notification-btn i {
+    font-size: 14px;
+  }
+}
