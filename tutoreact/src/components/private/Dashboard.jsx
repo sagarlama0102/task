@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import { useForm } from "react-hook-form";
 import Dashboard2CSS from "./Dashboard2.module.css"; // Import the CSS module
 
 function Dashboard() {
+  const { register, handleSubmit, formState: { errors } } = useForm();
   const [tasks, setTasks] = useState({
     todo: [],
     inprogress: [],
@@ -16,6 +18,9 @@ function Dashboard() {
     priority: "low",
   });
 
+  const [searchTerm, setSearchTerm] = useState(""); // For search
+  const [filterPriority, setFilterPriority] = useState(""); // For priority filter
+
   const allowDrop = (event) => {
     event.preventDefault();
   };
@@ -29,31 +34,31 @@ function Dashboard() {
     event.preventDefault();
     const taskData = event.dataTransfer.getData("task");
     const sourceColumn = event.dataTransfer.getData("source");
-  
+
     if (taskData && sourceColumn !== targetColumn) {
       try {
         const task = JSON.parse(taskData);
-  
+
         setTasks((prevTasks) => {
           const newTasks = { ...prevTasks };
-  
+
           // Remove the task from the source column
           if (sourceColumn in newTasks) {
             newTasks[sourceColumn] = newTasks[sourceColumn].filter(
               (t) => t.title !== task.title
             );
           }
-  
+
           // Check if task is already in the target column to avoid duplication
           const isTaskInTargetColumn = newTasks[targetColumn].some(
             (t) => t.title === task.title
           );
-  
+
           // Add the task to the target column only if it's not already there
           if (!isTaskInTargetColumn) {
             newTasks[targetColumn].push(task);
           }
-  
+
           return newTasks;
         });
       } catch (error) {
@@ -61,21 +66,22 @@ function Dashboard() {
       }
     }
   };
-  
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewTask({ ...newTask, [name]: value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const onSubmit = (data) => {
     setTasks((prevTasks) => ({
       ...prevTasks,
-      todo: [...prevTasks.todo, newTask],
+      todo: [...prevTasks.todo, data],
     }));
-    setNewTask({ title: "", description: "", dueDate: "", priority: "low" });
     setShowForm(false);
+  };
+
+  // Filter and search logic for tasks
+  const filterTasks = (taskList) => {
+    return taskList.filter(
+      (task) =>
+        task.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        (filterPriority === "" || task.priority === filterPriority)
+    );
   };
 
   return (
@@ -87,56 +93,83 @@ function Dashboard() {
         >
           <i className="fa fa-plus"></i> Add Task
         </button>
-        {/* <button className={Dashboard2CSS["notification-btn"]}>
-          <i className="fa fa-bell"></i> Notifications
-        </button> */}
+      </div>
+
+      {/* Top Bar: Search and Priority Filter */}
+      <div className={Dashboard2CSS["search-filter-bar"]}>
+        <input
+          type="text"
+          placeholder="Search tasks..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className={Dashboard2CSS["search-bar"]}
+        />
+        <select
+          value={filterPriority}
+          onChange={(e) => setFilterPriority(e.target.value)}
+          className={Dashboard2CSS["filter-select"]}
+        >
+          <option value="">Filter by Priority</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
       </div>
 
       {showForm && (
         <div className={Dashboard2CSS["form-modal"]}>
           <div className={Dashboard2CSS["form-content"]}>
             <h2>Add New Task</h2>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit(onSubmit)}>
               <label>
                 Task Title:
                 <input
                   type="text"
-                  name="title"
-                  value={newTask.title}
-                  onChange={handleInputChange}
-                  required
+                  {...register("title", {
+                    required: "Title is required",
+                    minLength: {
+                      value: 3,
+                      message: "Title must be at least 3 characters long",
+                    },
+                  })}
                 />
+                {errors.title && <p className={Dashboard2CSS["error-message"]}>{errors.title.message}</p>}
               </label>
               <label>
                 Description:
                 <textarea
-                  name="description"
-                  value={newTask.description}
-                  onChange={handleInputChange}
-                  required
+                  {...register("description", {
+                    required: "Description is required",
+                    minLength: {
+                      value: 10,
+                      message: "Description must be at least 10 characters long",
+                    },
+                  })}
                 />
+                {errors.description && <p className={Dashboard2CSS["error-message"]}>{errors.description.message}</p>}
               </label>
               <label>
                 Due Date:
                 <input
                   type="date"
-                  name="dueDate"
-                  value={newTask.dueDate}
-                  onChange={handleInputChange}
-                  required
+                  {...register("dueDate", {
+                    required: "Due date is required",
+                  })}
                 />
+                {errors.dueDate && <p className={Dashboard2CSS["error-message"]}>{errors.dueDate.message}</p>}
               </label>
               <label>
                 Priority:
                 <select
-                  name="priority"
-                  value={newTask.priority}
-                  onChange={handleInputChange}
+                  {...register("priority", {
+                    required: "Priority is required",
+                  })}
                 >
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
                   <option value="high">High</option>
                 </select>
+                {errors.priority && <p className={Dashboard2CSS["error-message"]}>{errors.priority.message}</p>}
               </label>
               <button type="submit">Add Task</button>
               <button type="button" onClick={() => setShowForm(false)}>
@@ -148,7 +181,7 @@ function Dashboard() {
       )}
 
       <div id="dashboard-content">
-        <h1>Dashboard</h1>
+        <h1>General Task Board</h1>
         <div className={Dashboard2CSS["kanban-board"]}>
           <div
             className={Dashboard2CSS["kanban-column"]}
@@ -158,7 +191,7 @@ function Dashboard() {
           >
             <h2>To-Do</h2>
             <div className={Dashboard2CSS["task-list"]}>
-              {tasks.todo.map((task, index) => (
+              {filterTasks(tasks.todo).map((task, index) => (
                 <div
                   key={index}
                   className={Dashboard2CSS["kanban-task"]}

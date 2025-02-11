@@ -65,7 +65,7 @@ const deleteTask = async (req, res)=>{
 const getAllTasks= async(req, res)=>{
   try{
     const tasks = await taskSchema.findAll();
-    res.status(200).send({data:posts});
+    res.status(200).send({data: tasks});
   }catch(error){
     console.log("Error fetching tasks:",error);
     res.status(500).json({error:"Failed to fetch tasks"});
@@ -88,4 +88,4 @@ const getTaskbyId= async (req, res)=>{
   }
 };
 
-  module.exports={createTask,update,deleteTask,getAllTasks,getTaskbyId};
+module.exports={createTask,update,deleteTask,getAllTasks,getTaskbyId};

@@ -1,37 +1,18 @@
 import React, { useState } from "react";
+import { useForm } from "react-hook-form";
 import styles from "./Task.module.css"; // Import the CSS module
 
 function Task() {
+  const { register, handleSubmit, formState: { errors }, reset } = useForm();
   const [showForm, setShowForm] = useState(false);
   const [tasks, setTasks] = useState([]); // Store tasks
-  const [newTask, setNewTask] = useState({
-    title: "",
-    description: "",
-    dueDate: "",
-    priority: "low",
-    meetings: "",
-  });
 
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
-    setNewTask((prevTask) => ({
-      ...prevTask,
-      [name]: value,
-    }));
-  };
+  const [searchTerm, setSearchTerm] = useState(""); // For search
+  const [filterPriority, setFilterPriority] = useState(""); // For priority filter
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    // Add the new task to the list
-    setTasks((prevTasks) => [...prevTasks, newTask]);
-    // Reset the form
-    setNewTask({
-      title: "",
-      description: "",
-      dueDate: "",
-      priority: "low",
-      meetings: "",
-    });
+  const onSubmit = (data) => {
+    setTasks((prevTasks) => [...prevTasks, data]);
+    reset();
     setShowForm(false);
   };
 
@@ -43,97 +24,138 @@ function Task() {
   const handleUpdate = (index) => {
     // Populate the form with the task to update
     const taskToUpdate = tasks[index];
-    setNewTask(taskToUpdate);
+    reset(taskToUpdate);
     setShowForm(true);
     // Remove the task to be updated
     setTasks(tasks.filter((_, taskIndex) => taskIndex !== index));
   };
 
+  // Filter and search logic for tasks
+  const filterTasks = (taskList) => {
+    return taskList.filter(
+      (task) =>
+        task.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        (filterPriority === "" || task.priority === filterPriority)
+    );
+  };
+
   return (
     <div className={styles["task-section"]}>
-      <div className={styles["header"]}>
-        <h1>Task Section</h1>
-        <button className={styles["add-task-btn"]} onClick={() => setShowForm(true)}>
-          <i className="fa fa-plus"></i> Add Task
+      <div className={styles["top-right-buttons"]}>
+      <button className={styles["add-project-btn"]} onClick={() => setShowForm(true)}>
+          <i className="fa fa-plus"></i> Add Project
         </button>
+      </div>
+      
+
+      {/* Top Bar: Search and Priority Filter */}
+      <div className={styles["search-filter-bar"]}>
+        <input
+          type="text"
+          placeholder="Search tasks..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className={styles["search-bar"]}
+        />
+        <select
+          value={filterPriority}
+          onChange={(e) => setFilterPriority(e.target.value)}
+          className={styles["filter-select"]}
+        >
+          <option value="">Filter by Priority</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+      <div className={styles["header"]}>
+        <h1>Project Section</h1>
+        
       </div>
 
       {showForm && (
-        <div className={styles["form-container"]}>
-          <h2>Add New Task</h2>
-          <form onSubmit={handleSubmit}>
-            <label>
-              Title:
-              <input
-                type="text"
-                name="title"
-                value={newTask.title}
-                onChange={handleInputChange}
-                required
-              />
-            </label>
-            <label>
-              Description:
-              <textarea
-                name="description"
-                value={newTask.description}
-                onChange={handleInputChange}
-                required
-              />
-            </label>
-            <label>
-              Due Date:
-              <input
-                type="date"
-                name="dueDate"
-                value={newTask.dueDate}
-                onChange={handleInputChange}
-                required
-              />
-            </label>
-            <label>
-              Meetings:
-              <input
-                type="text"
-                name="meetings"
-                value={newTask.meetings}
-                onChange={handleInputChange}
-                placeholder="Enter meeting details"
-              />
-            </label>
-            <label>
-              Priority:
-              <select
-                name="priority"
-                value={newTask.priority}
-                onChange={handleInputChange}
+        <div className={styles["form-modal"]}>
+          <div className={styles["form-container"]}>
+            <h2>Create New Projects</h2>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <label>
+                Title:
+                <input
+                  type="text"
+                  {...register("title", {
+                    required: "Title is required",
+                    minLength: {
+                      value: 3,
+                      message: "Title must be at least 3 characters long",
+                    },
+                  })}
+                />
+                {errors.title && <p className={styles["error-message"]}>{errors.title.message}</p>}
+              </label>
+              <label>
+                Description:
+                <textarea
+                  {...register("description", {
+                    required: "Description is required",
+                    minLength: {
+                      value: 10,
+                      message: "Description must be at least 10 characters long",
+                    },
+                  })}
+                />
+                {errors.description && <p className={styles["error-message"]}>{errors.description.message}</p>}
+              </label>
+              <label>
+                Due Date:
+                <input
+                  type="date"
+                  {...register("dueDate", {
+                    required: "Due date is required",
+                  })}
+                />
+                {errors.dueDate && <p className={styles["error-message"]}>{errors.dueDate.message}</p>}
+              </label>
+              <label>
+                Priority:
+                <select
+                  {...register("priority", {
+                    required: "Priority is required",
+                  })}
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+                {errors.priority && <p className={styles["error-message"]}>{errors.priority.message}</p>}
+              </label>
+              <button type="submit">Add Project</button>
+              <button
+                type="button"
+                className={styles["cancel-btn"]}
+                onClick={() => setShowForm(false)}
               >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-            </label>
-            <button type="submit">Add Task</button>
-            <button
-              type="button"
-              className={styles["cancel-btn"]}
-              onClick={() => setShowForm(false)}
-            >
-              Cancel
-            </button>
-          </form>
+                Cancel
+              </button>
+            </form>
+          </div>
         </div>
       )}
 
       {/* Display tasks in card view */}
       <div className={styles["task-cards-container"]}>
-        {tasks.map((task, index) => (
+        {filterTasks(tasks).map((task, index) => (
           <div key={index} className={styles["task-card"]}>
             <h3>{task.title}</h3>
             <p><strong>Description:</strong> {task.description}</p>
             <p><strong>Due Date:</strong> {task.dueDate}</p>
-            <p><strong>Meetings:</strong> {task.meetings}</p>
             <p><strong>Priority:</strong> {task.priority}</p>
+
+            <button
+              className={styles["addtask-btn"]}
+              onClick={() => handleUpdate(index)}
+            >
+              Add Task
+            </button>
             <button
               className={styles["update-btn"]}
               onClick={() => handleUpdate(index)}
