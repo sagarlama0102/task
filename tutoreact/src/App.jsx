@@ -1,6 +1,8 @@
 import React, { Suspense, lazy } from "react";
 import './App.css';
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import ProtectedRoute from "./protectedRoute";
+
 
 // Lazy load the components
 const Login = lazy(() => import("./components/public/Login"));
@@ -16,13 +18,19 @@ function App() {
       <BrowserRouter>
         <Suspense fallback={<div>Loading...</div>}>
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<Layout />} />
             <Route path="/Login" element={<Login />} />
-            <Route path="/DashboardLayout" element={<DashboardLayout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="Profile" element={<Profile />} />
-              <Route path="Task" element={<Task />} />
+
+            {/* Protected Routes */}
+            <Route element={<ProtectedRoute />}> 
+              <Route path="/DashboardLayout" element={<DashboardLayout />}>
+                <Route index element={<Dashboard />} />
+                <Route path="Profile" element={<Profile />} />
+                <Route path="Task" element={<Task />} />
+              </Route>
             </Route>
+
           </Routes>
         </Suspense>
       </BrowserRouter>
