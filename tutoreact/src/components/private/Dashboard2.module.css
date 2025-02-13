@@ -54,6 +54,19 @@
   background-color: #f9f9f9;
 }
 
+/* Task Colors */
+.todo-task {
+  background-color: #ffffff; /* Light gray */
+}
+
+.inprogress-task {
+  background-color: #fff8b7; /* Light yellow */
+}
+
+.completed-task {
+  background-color: #b9ffc9; /* Light green */
+}
+
 /* Scrollbar Styling */
 .kanban-column::-webkit-scrollbar {
   width: 8px;

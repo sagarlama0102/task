@@ -22,7 +22,7 @@
 
 @media (max-width: 480px) {
   .outlet {
-    margin-left: 60px;
+    margin-left: 20px;
     width: calc(100% - 60px);
   }
 }

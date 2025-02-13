@@ -17,10 +17,8 @@ const Navbar =() =>{
     return (
         <nav id="navbar" className={menuOpen ? "open" : ""}>
         <div id="logo">
-            <img src="" alt="logo not found" />
+            <img src="src/assets/secondtasklogo-removebg-preview.png" alt="logo not found" />
         </div>
-        
-        
             <ul id="nav_items">
             <li className="items"><a href="#home">Home</a></li>
             <li className="items"><a href="#aboutus">About Us</a></li>

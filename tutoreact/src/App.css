@@ -39,6 +39,10 @@ html{
 #logo{
     margin: 9px 20px;
 }
+#logo img{
+    height: 200px;
+   
+}
 #navbar ul{
     display: flex;
     padding-left:180px;

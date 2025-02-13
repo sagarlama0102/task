@@ -194,7 +194,7 @@ function Dashboard() {
               {filterTasks(tasks.todo).map((task, index) => (
                 <div
                   key={index}
-                  className={Dashboard2CSS["kanban-task"]}
+                  className={`${Dashboard2CSS["kanban-task"]} ${Dashboard2CSS["todo-task"]}`}
                   draggable="true"
                   onDragStart={(event) => drag(event, task, "todo")} // Pass "todo" as source column
                 >
@@ -217,7 +217,7 @@ function Dashboard() {
               {tasks.inprogress.map((task, index) => (
                 <div
                   key={index}
-                  className={Dashboard2CSS["kanban-task"]}
+                  className={`${Dashboard2CSS["kanban-task"]} ${Dashboard2CSS["inprogress-task"]}`}
                   draggable="true"
                   onDragStart={(event) => drag(event, task, "inprogress")} // Pass "inprogress" as source column
                 >
@@ -240,7 +240,7 @@ function Dashboard() {
               {tasks.completed.map((task, index) => (
                 <div
                   key={index}
-                  className={Dashboard2CSS["kanban-task"]}
+                  className={`${Dashboard2CSS["kanban-task"]} ${Dashboard2CSS["completed-task"]}`}
                   draggable="true"
                   onDragStart={(event) => drag(event, task, "completed")} // Pass "completed" as source column
                 >

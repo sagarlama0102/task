@@ -17,6 +17,7 @@ const AboutUs =()=>{
                 <h3>Why Choose Us?</h3>
                 <p>We offer advanced features to boost productivity and keep your projects on track, helping you meet deadlines effortlessly.</p>
             </div>
+            
         </div>
     </section>
     );

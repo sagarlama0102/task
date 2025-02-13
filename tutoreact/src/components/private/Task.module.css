@@ -219,7 +219,8 @@
 @media (max-width: 768px) {
   .form-container {
     padding: 15px;
-    max-width: 90%;
+    width: 70%;
+    /* max-width: 90%; */
   }
 
   .add-project-btn {
@@ -250,7 +251,8 @@
 @media (max-width: 480px) {
   .form-container {
     padding: 10px;
-    max-width: 95%;
+    width: 75%;
+    /* max-width: 95%; */
   }
 
   .add-project-btn {

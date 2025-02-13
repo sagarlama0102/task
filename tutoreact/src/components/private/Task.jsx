@@ -6,12 +6,26 @@ function Task() {
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
   const [showForm, setShowForm] = useState(false);
   const [tasks, setTasks] = useState([]); // Store tasks
+  const [isUpdateMode, setIsUpdateMode] = useState(false); // Track if we are in update mode
+  const [currentTaskIndex, setCurrentTaskIndex] = useState(null); // Track the index of the task being updated
 
   const [searchTerm, setSearchTerm] = useState(""); // For search
   const [filterPriority, setFilterPriority] = useState(""); // For priority filter
 
   const onSubmit = (data) => {
-    setTasks((prevTasks) => [...prevTasks, data]);
+    if (isUpdateMode) {
+      // Update the task
+      setTasks((prevTasks) => {
+        const updatedTasks = [...prevTasks];
+        updatedTasks[currentTaskIndex] = data;
+        return updatedTasks;
+      });
+      setIsUpdateMode(false);
+      setCurrentTaskIndex(null);
+    } else {
+      // Add a new task
+      setTasks((prevTasks) => [...prevTasks, data]);
+    }
     reset();
     setShowForm(false);
   };
@@ -26,8 +40,8 @@ function Task() {
     const taskToUpdate = tasks[index];
     reset(taskToUpdate);
     setShowForm(true);
-    // Remove the task to be updated
-    setTasks(tasks.filter((_, taskIndex) => taskIndex !== index));
+    setIsUpdateMode(true);
+    setCurrentTaskIndex(index);
   };
 
   // Filter and search logic for tasks
@@ -42,11 +56,20 @@ function Task() {
   return (
     <div className={styles["task-section"]}>
       <div className={styles["top-right-buttons"]}>
-      <button className={styles["add-project-btn"]} onClick={() => setShowForm(true)}>
+        <button className={styles["add-project-btn"]} onClick={() => {
+          setShowForm(true);
+          setIsUpdateMode(false);
+          reset({
+            title: "",
+            description: "",
+            dueDate: "",
+            priority: "low",
+            numberOfTasks: 1,
+          });
+        }}>
           <i className="fa fa-plus"></i> Add Project
         </button>
       </div>
-      
 
       {/* Top Bar: Search and Priority Filter */}
       <div className={styles["search-filter-bar"]}>
@@ -70,13 +93,12 @@ function Task() {
       </div>
       <div className={styles["header"]}>
         <h1>Project Section</h1>
-        
       </div>
 
       {showForm && (
         <div className={styles["form-modal"]}>
           <div className={styles["form-container"]}>
-            <h2>Create New Projects</h2>
+            <h2>{isUpdateMode ? "Update Project" : "Create New Project"}</h2>
             <form onSubmit={handleSubmit(onSubmit)}>
               <label>
                 Title:
@@ -128,7 +150,22 @@ function Task() {
                 </select>
                 {errors.priority && <p className={styles["error-message"]}>{errors.priority.message}</p>}
               </label>
-              <button type="submit">Add Project</button>
+              <label>
+                Number of Tasks:
+                <input
+                  type="number"
+                  {...register("numberOfTasks", {
+                    required: "Number of tasks is required",
+                    min: {
+                      value: 1,
+                      message: "Number of tasks must be at least 1",
+                    },
+                  })}
+                  defaultValue={1}
+                />
+                {errors.numberOfTasks && <p className={styles["error-message"]}>{errors.numberOfTasks.message}</p>}
+              </label>
+              <button type="submit">{isUpdateMode ? "Update Project" : "Add Project"}</button>
               <button
                 type="button"
                 className={styles["cancel-btn"]}
@@ -149,15 +186,10 @@ function Task() {
             <p><strong>Description:</strong> {task.description}</p>
             <p><strong>Due Date:</strong> {task.dueDate}</p>
             <p><strong>Priority:</strong> {task.priority}</p>
+            <p><strong>Number of Tasks:</strong> {task.numberOfTasks}</p>
 
             <button
               className={styles["addtask-btn"]}
-              onClick={() => handleUpdate(index)}
-            >
-              Add Task
-            </button>
-            <button
-              className={styles["update-btn"]}
               onClick={() => handleUpdate(index)}
             >
               Update
