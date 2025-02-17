@@ -11,6 +11,7 @@ function Task() {
   const [isUpdateMode, setIsUpdateMode] = useState(false); // Track if we are in update mode
   const [currentTaskId, setCurrentTaskId] = useState(null); // Track the ID of the task being updated
 
+
   const [searchTerm, setSearchTerm] = useState(""); // For search
   const [filterPriority, setFilterPriority] = useState(""); // For priority filter
 
@@ -32,12 +33,18 @@ function Task() {
   const onSubmit = async (data) => {
     try {
       if (isUpdateMode) {
-        // Update task
-        await axios.put(`${API.BASE_URL}/api/project/${currentTaskId}`, data);
+        // Update task - map the form fields to match API expectations
+        const updateData = {
+          projectTitle: data.title,
+          projectDescription: data.description,
+          projectDate: data.dueDate,
+          priority: data.priority
+        };
+        await axios.put(`${API.BASE_URL}/api/project/${currentTaskId}`, updateData);
         setIsUpdateMode(false);
         setCurrentTaskId(null);
       } else {
-        // Add new task
+        // Add new task - send data directly as it was working before
         await axios.post(`${API.BASE_URL}/api/project/`, data);
       }
       fetchTasks(); // Refresh task list
@@ -87,8 +94,8 @@ function Task() {
           reset({
             title: "",
             description: "",
-            dueDate: "",
-            priority: "low",
+            dueDate: new Date().toISOString().split('T')[0],
+            priority: "low"
           });
         }}>
           <i className="fa fa-plus"></i> Add Project
@@ -128,51 +135,32 @@ function Task() {
                 Title:
                 <input
                   type="text"
-                  {...register("title", {
-                    required: "Title is required",
-                    minLength: {
-                      value: 3,
-                      message: "Title must be at least 3 characters long",
-                    },
-                  })}
+                  {...register("title")}
                 />
-                {errors.title && <p className={styles["error-message"]}>{errors.title.message}</p>}
               </label>
               <label>
                 Description:
                 <textarea
-                  {...register("description", {
-                    required: "Description is required",
-                    minLength: {
-                      value: 10,
-                      message: "Description must be at least 10 characters long",
-                    },
-                  })}
+                  {...register("description")}
                 />
-                {errors.description && <p className={styles["error-message"]}>{errors.description.message}</p>}
               </label>
               <label>
                 Due Date:
                 <input
                   type="date"
-                  {...register("dueDate", {
-                    required: "Due date is required",
-                  })}
+                  {...register("dueDate")}
                 />
-                {errors.dueDate && <p className={styles["error-message"]}>{errors.dueDate.message}</p>}
               </label>
               <label>
                 Priority:
                 <select
-                  {...register("priority", {
-                    required: "Priority is required",
-                  })}
+                  {...register("priority")}
+                  defaultValue="low"
                 >
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
                   <option value="high">High</option>
                 </select>
-                {errors.priority && <p className={styles["error-message"]}>{errors.priority.message}</p>}
               </label>
               <button type="submit">{isUpdateMode ? "Update Project" : "Add Project"}</button>
               <button
