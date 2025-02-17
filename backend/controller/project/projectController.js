@@ -1,9 +1,10 @@
 const projectSchema = require('../../model/projectSchema');
 
 const createProject = async (req, res) => {
+  console.log(req.body)
   try {
-    const { projectTitle, projectDescription, projectDate, priority } = req.body;
-    if (!projectTitle || !projectDescription || !projectDate || !priority) {
+    const { title, description, dueDate, priority } = req.body;
+    if (!title || !description || !dueDate || !priority) {
       return res.status(400).json({ message: "All fields are required" });
     }
     const validPriorities = ["low", "medium", "high"];
@@ -11,9 +12,9 @@ const createProject = async (req, res) => {
       return res.status(400).json({ message: "Invalid priority value" });
     }
     const newProject = await projectSchema.create({
-      projectTitle,
-      projectDescription,
-      projectDate,
+      projectTitle:title,
+      projectDescription:description,
+      projectDate:dueDate,
       priority,
     });
     res.status(201).json({ newProject, message: "Project created successfully" });

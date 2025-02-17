@@ -22,6 +22,10 @@ const Tasks = sequelize.define("tasks", {
     priority:{
         type:DataTypes.STRING,
         allowNull:false,
+    },
+    status:{
+        type:DataTypes.STRING,
+        allowNull:false,
     }
 });
 

@@ -19,7 +19,7 @@ const {createUploadsFolder} = require("./security/helper");
 dotenv.config();
 app.use(cors());
 app.use(bodyparser.json());
-app.use(authenticateToken);
+// app.use(authenticateToken);
 app.use("/api/user",userRoute);
 app.use("/api/task", taskRoute);
 app.use("/api/project",projectRoute);

@@ -1,8 +1,9 @@
 const taskSchema = require("../../model/taskSchema");
 
 const createTask = async (req, res) => {
+  console.log(req.body)
     try {
-      const { taskTitle, taskDescription, taskDate, priority } = req.body;
+      const { taskTitle, taskDescription, taskDate, priority,status } = req.body;
       if (!taskTitle || !taskDescription || !taskDate || !priority) {
         return res.status(400).json({ message: "All fields are required" });
       }
@@ -15,8 +16,10 @@ const createTask = async (req, res) => {
         taskDescription,
         taskDate,
         priority,
+        status
       });
-      res.status(201).json({newTask, message: "Task created successfully"});
+      const taskCreate= await taskSchema.findAll()
+      res.status(201).json({data:newTask,taskCreate, message: "Task created successfully"});
     } catch (error) {
       console.log(error);
       res.status(500).json({ error: error.message });
@@ -65,7 +68,7 @@ const deleteTask = async (req, res)=>{
 const getAllTasks= async(req, res)=>{
   try{
     const tasks = await taskSchema.findAll();
-    res.status(200).send({data: tasks});
+    res.status(200).send({data:tasks});
   }catch(error){
     console.log("Error fetching tasks:",error);
     res.status(500).json({error:"Failed to fetch tasks"});

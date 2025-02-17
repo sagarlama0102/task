@@ -1,9 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import axios from "axios";
 import Dashboard2CSS from "./Dashboard2.module.css"; // Import the CSS module
+import { toast } from "react-toastify";
+import { API } from "../../environment";
 
 function Dashboard() {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm();
+
   const [tasks, setTasks] = useState({
     todo: [],
     inprogress: [],
@@ -11,23 +20,93 @@ function Dashboard() {
   });
 
   const [showForm, setShowForm] = useState(false);
-  const [newTask, setNewTask] = useState({
-    title: "",
-    description: "",
-    dueDate: "",
-    priority: "low",
-  });
-
   const [searchTerm, setSearchTerm] = useState(""); // For search
   const [filterPriority, setFilterPriority] = useState(""); // For priority filter
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const response = await axios.get(
+          `${API.BASE_URL}/api/task/get_all_task`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`, // Add your auth token if needed
+            },
+          }
+        );
+
+        const fetchedTasks = response?.data.data;
+
+        // Organize tasks by status
+        const todoTasks = fetchedTasks.filter(
+          (task) => task?.status === "todo"
+        );
+        const inProgressTasks = fetchedTasks.filter(
+          (task) => task?.status === "inprogress"
+        );
+        const completedTasks = fetchedTasks.filter(
+          (task) => task?.status === "completed"
+        );
+
+        setTasks({
+          todo: todoTasks,
+          inprogress: inProgressTasks,
+          completed: completedTasks,
+        });
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+      }
+    };
+
+    fetchTasks();
+  }, []);
+
+  const onSubmit = async (data) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No token found");
+      }
+
+      const taskData = {
+        taskTitle: data.title,
+        taskDescription: data.description,
+        taskDate: data.dueDate,
+        priority: data.priority,
+        status: "todo",
+      };
+
+      const response = await axios.post(`${API.BASE_URL}/api/task`, taskData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const newTask = response.data.data;
+
+      // Ensure the task is only added once
+      setTasks((prevTasks) => ({
+        ...prevTasks,
+        todo: [...prevTasks.todo, newTask],
+      }));
+
+      setShowForm(false);
+      reset();
+      toast.success("Task created successfully");
+    } catch (error) {
+      console.error("Error creating task:", error);
+      toast.error("Error creating task");
+    }
+  };
 
   const allowDrop = (event) => {
     event.preventDefault();
   };
 
   const drag = (event, task, sourceColumn) => {
-    event.dataTransfer.setData("task", JSON.stringify(task)); // Pass task as JSON string
-    event.dataTransfer.setData("source", sourceColumn); // Pass source column ID explicitly
+    event.dataTransfer.setData("task", JSON.stringify(task));
+    event.dataTransfer.setData("source", sourceColumn);
   };
 
   const drop = (event, targetColumn) => {
@@ -38,48 +117,47 @@ function Dashboard() {
     if (taskData && sourceColumn !== targetColumn) {
       try {
         const task = JSON.parse(taskData);
+        task.status = targetColumn;
 
         setTasks((prevTasks) => {
           const newTasks = { ...prevTasks };
 
           // Remove the task from the source column
-          if (sourceColumn in newTasks) {
-            newTasks[sourceColumn] = newTasks[sourceColumn].filter(
-              (t) => t.title !== task.title
-            );
-          }
-
-          // Check if task is already in the target column to avoid duplication
-          const isTaskInTargetColumn = newTasks[targetColumn].some(
-            (t) => t.title === task.title
+          newTasks[sourceColumn] = newTasks[sourceColumn].filter(
+            (t) => t.taskId !== task.taskId
           );
 
-          // Add the task to the target column only if it's not already there
-          if (!isTaskInTargetColumn) {
-            newTasks[targetColumn].push(task);
-          }
+          // Add the task to the target column
+          newTasks[targetColumn] = [...newTasks[targetColumn], task];
 
           return newTasks;
         });
+
+        const token = localStorage.getItem("token");
+        axios
+          .put(`${API.BASE_URL}/api/task/update_task/${task.taskId}`, task, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          })
+          .then(() => {
+            toast.success("Task status updated successfully");
+          })
+          .catch((error) => {
+            console.error("Error updating task status:", error);
+            toast.error("Error updating task status");
+          });
       } catch (error) {
         console.error("Error parsing task data:", error);
       }
     }
   };
 
-  const onSubmit = (data) => {
-    setTasks((prevTasks) => ({
-      ...prevTasks,
-      todo: [...prevTasks.todo, data],
-    }));
-    setShowForm(false);
-  };
-
-  // Filter and search logic for tasks
   const filterTasks = (taskList) => {
     return taskList.filter(
       (task) =>
-        task.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        task.taskTitle.toLowerCase().includes(searchTerm.toLowerCase()) &&
         (filterPriority === "" || task.priority === filterPriority)
     );
   };
@@ -95,7 +173,6 @@ function Dashboard() {
         </button>
       </div>
 
-      {/* Top Bar: Search and Priority Filter */}
       <div className={Dashboard2CSS["search-filter-bar"]}>
         <input
           type="text"
@@ -133,7 +210,11 @@ function Dashboard() {
                     },
                   })}
                 />
-                {errors.title && <p className={Dashboard2CSS["error-message"]}>{errors.title.message}</p>}
+                {errors.title && (
+                  <p className={Dashboard2CSS["error-message"]}>
+                    {errors.title.message}
+                  </p>
+                )}
               </label>
               <label>
                 Description:
@@ -142,11 +223,16 @@ function Dashboard() {
                     required: "Description is required",
                     minLength: {
                       value: 10,
-                      message: "Description must be at least 10 characters long",
+                      message:
+                        "Description must be at least 10 characters long",
                     },
                   })}
                 />
-                {errors.description && <p className={Dashboard2CSS["error-message"]}>{errors.description.message}</p>}
+                {errors.description && (
+                  <p className={Dashboard2CSS["error-message"]}>
+                    {errors.description.message}
+                  </p>
+                )}
               </label>
               <label>
                 Due Date:
@@ -156,7 +242,11 @@ function Dashboard() {
                     required: "Due date is required",
                   })}
                 />
-                {errors.dueDate && <p className={Dashboard2CSS["error-message"]}>{errors.dueDate.message}</p>}
+                {errors.dueDate && (
+                  <p className={Dashboard2CSS["error-message"]}>
+                    {errors.dueDate.message}
+                  </p>
+                )}
               </label>
               <label>
                 Priority:
@@ -169,7 +259,11 @@ function Dashboard() {
                   <option value="medium">Medium</option>
                   <option value="high">High</option>
                 </select>
-                {errors.priority && <p className={Dashboard2CSS["error-message"]}>{errors.priority.message}</p>}
+                {errors.priority && (
+                  <p className={Dashboard2CSS["error-message"]}>
+                    {errors.priority.message}
+                  </p>
+                )}
               </label>
               <button type="submit">Add Task</button>
               <button type="button" onClick={() => setShowForm(false)}>
@@ -183,75 +277,36 @@ function Dashboard() {
       <div id="dashboard-content">
         <h1>General Task Board</h1>
         <div className={Dashboard2CSS["kanban-board"]}>
-          <div
-            className={Dashboard2CSS["kanban-column"]}
-            id="todo"
-            onDrop={(event) => drop(event, "todo")}
-            onDragOver={allowDrop}
-          >
-            <h2>To-Do</h2>
-            <div className={Dashboard2CSS["task-list"]}>
-              {filterTasks(tasks.todo).map((task, index) => (
-                <div
-                  key={index}
-                  className={`${Dashboard2CSS["kanban-task"]} ${Dashboard2CSS["todo-task"]}`}
-                  draggable="true"
-                  onDragStart={(event) => drag(event, task, "todo")} // Pass "todo" as source column
-                >
-                  <h3>{task.title}</h3>
-                  <p>{task.description}</p>
-                  <p>Due: {task.dueDate}</p>
-                  <p>Priority: {task.priority}</p>
-                </div>
-              ))}
+          {["todo", "inprogress", "completed"].map((status) => (
+            <div
+              className={Dashboard2CSS["kanban-column"]}
+              key={status}
+              id={status}
+              onDrop={(event) => drop(event, status)}
+              onDragOver={allowDrop}
+            >
+              <h2>{status.replace(/^\w/, (c) => c.toUpperCase())}</h2>
+              <div className={Dashboard2CSS["task-list"]}>
+                {filterTasks(tasks[status]).map((task, index) => (
+                  <div
+                    key={index}
+                    className={`${Dashboard2CSS["kanban-task"]} ${
+                      Dashboard2CSS[`${status}-task`]
+                    }`}
+                    draggable="true"
+                    onDragStart={(event) =>
+                      drag(event, task, status)
+                    }
+                  >
+                    <h3>{task?.taskTitle}</h3>
+                    <p>{task?.taskDescription}</p>
+                    <p>Due: {task?.taskDate}</p>
+                    <p>Priority: {task?.priority}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-          <div
-            className={Dashboard2CSS["kanban-column"]}
-            id="inprogress"
-            onDrop={(event) => drop(event, "inprogress")}
-            onDragOver={allowDrop}
-          >
-            <h2>In Progress</h2>
-            <div className={Dashboard2CSS["task-list"]}>
-              {tasks.inprogress.map((task, index) => (
-                <div
-                  key={index}
-                  className={`${Dashboard2CSS["kanban-task"]} ${Dashboard2CSS["inprogress-task"]}`}
-                  draggable="true"
-                  onDragStart={(event) => drag(event, task, "inprogress")} // Pass "inprogress" as source column
-                >
-                  <h3>{task.title}</h3>
-                  <p>{task.description}</p>
-                  <p>Due: {task.dueDate}</p>
-                  <p>Priority: {task.priority}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div
-            className={Dashboard2CSS["kanban-column"]}
-            id="completed"
-            onDrop={(event) => drop(event, "completed")}
-            onDragOver={allowDrop}
-          >
-            <h2>Completed</h2>
-            <div className={Dashboard2CSS["task-list"]}>
-              {tasks.completed.map((task, index) => (
-                <div
-                  key={index}
-                  className={`${Dashboard2CSS["kanban-task"]} ${Dashboard2CSS["completed-task"]}`}
-                  draggable="true"
-                  onDragStart={(event) => drag(event, task, "completed")} // Pass "completed" as source column
-                >
-                  <h3>{task.title}</h3>
-                  <p>{task.description}</p>
-                  <p>Due: {task.dueDate}</p>
-                  <p>Priority: {task.priority}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>

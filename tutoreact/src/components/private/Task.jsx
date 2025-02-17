@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import axios from "axios";
 import styles from "./Task.module.css"; // Import the CSS module
+import { API } from "../../environment";
 
 function Task() {
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
@@ -12,43 +14,97 @@ function Task() {
   const [searchTerm, setSearchTerm] = useState(""); // For search
   const [filterPriority, setFilterPriority] = useState(""); // For priority filter
 
-  const onSubmit = (data) => {
-    if (isUpdateMode) {
-      // Update the task
-      setTasks((prevTasks) => {
-        const updatedTasks = [...prevTasks];
-        updatedTasks[currentTaskIndex] = data;
-        return updatedTasks;
-      });
-      setIsUpdateMode(false);
-      setCurrentTaskIndex(null);
-    } else {
-      // Add a new task
-      setTasks((prevTasks) => [...prevTasks, data]);
+ // Fetch tasks from the backend
+  const fetchTasks = async () => {
+    try {
+      const response = await axios.get(`${API.BASE_URL}/api/project/`);
+      setTasks(response.data?.data);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
     }
-    reset();
-    setShowForm(false);
   };
 
-  const handleDelete = (index) => {
-    // Delete task from the list
-    setTasks(tasks.filter((_, taskIndex) => taskIndex !== index));
-  };
+  useEffect(() => {
+    fetchTasks();
+  }, []);
 
-  const handleUpdate = (index) => {
-    // Populate the form with the task to update
-    const taskToUpdate = tasks[index];
-    reset(taskToUpdate);
-    setShowForm(true);
-    setIsUpdateMode(true);
-    setCurrentTaskIndex(index);
-  };
+    // Handle form submission for adding/updating a task
+    const onSubmit = async (data) => {
+      try {
+        if (isUpdateMode) {
+          // Update task
+          await axios.put(`${API.BASE_URL}/api/project/${tasks.projectId}`, data);
+          setIsUpdateMode(false);
+          setCurrentTaskId(null);
+        } else {
+          // Add new task
+          await axios.post(`${API.BASE_URL}/api/project/`, data);
+        }
+        fetchTasks(); // Refresh task list
+        reset();
+        setShowForm(false);
+      } catch (error) {
+        console.error("Error submitting form:", error);
+      }
+    };
+  
+    // Delete a task
+    const handleDelete = async (id) => {
+      try {
+        await axios.delete(`${API.BASE_URL}/api/project/${id}`);
+        fetchTasks(); // Refresh task list
+      } catch (error) {
+        console.error("Error deleting task:", error);
+      }
+    };
+  
+   // Update a task
+    const handleUpdate = (task) => {
+      reset(task);
+      setShowForm(true);
+      setIsUpdateMode(true);
+      setCurrentTaskId(task.projectId);
+    };
+
+
+
+  // const onSubmit = (data) => {
+  //   if (isUpdateMode) {
+  //     // Update the task
+  //     setTasks((prevTasks) => {
+  //       const updatedTasks = [...prevTasks];
+  //       updatedTasks[currentTaskIndex] = data;
+  //       return updatedTasks;
+  //     });
+  //     setIsUpdateMode(false);
+  //     setCurrentTaskIndex(null);
+  //   } else {
+  //     // Add a new task
+  //     setTasks((prevTasks) => [...prevTasks, data]);
+  //   }
+  //   reset();
+  //   setShowForm(false);
+  // };
+
+  // const handleDelete = (index) => {
+  //   // Delete task from the list
+  //   setTasks(tasks.filter((_, taskIndex) => taskIndex !== index));
+  // };
+
+  // const handleUpdate = (index) => {
+  //   // Populate the form with the task to update
+  //   const taskToUpdate = tasks[index];
+  //   reset(taskToUpdate);
+  //   setShowForm(true);
+  //   setIsUpdateMode(true);
+  //   setCurrentTaskIndex(index);
+  // };
 
   // Filter and search logic for tasks
   const filterTasks = (taskList) => {
     return taskList.filter(
       (task) =>
-        task.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        task.projectTitle.toLowerCase().includes(searchTerm.toLowerCase()) &&
         (filterPriority === "" || task.priority === filterPriority)
     );
   };
@@ -104,7 +160,7 @@ function Task() {
                 Title:
                 <input
                   type="text"
-                  {...register("title", {
+                  {...register("projectTitle", {
                     required: "Title is required",
                     minLength: {
                       value: 3,
@@ -117,7 +173,9 @@ function Task() {
               <label>
                 Description:
                 <textarea
-                  {...register("description", {
+                                  value={tasks?.projectDescription}
+
+                  {...register("projectDescription", {
                     required: "Description is required",
                     minLength: {
                       value: 10,
@@ -131,7 +189,8 @@ function Task() {
                 Due Date:
                 <input
                   type="date"
-                  {...register("dueDate", {
+                  value={tasks?.projectDate}
+                  {...register("projectDate", {
                     required: "Due date is required",
                   })}
                 />
@@ -150,21 +209,6 @@ function Task() {
                 </select>
                 {errors.priority && <p className={styles["error-message"]}>{errors.priority.message}</p>}
               </label>
-              <label>
-                Number of Tasks:
-                <input
-                  type="number"
-                  {...register("numberOfTasks", {
-                    required: "Number of tasks is required",
-                    min: {
-                      value: 1,
-                      message: "Number of tasks must be at least 1",
-                    },
-                  })}
-                  defaultValue={1}
-                />
-                {errors.numberOfTasks && <p className={styles["error-message"]}>{errors.numberOfTasks.message}</p>}
-              </label>
               <button type="submit">{isUpdateMode ? "Update Project" : "Add Project"}</button>
               <button
                 type="button"
@@ -182,9 +226,9 @@ function Task() {
       <div className={styles["task-cards-container"]}>
         {filterTasks(tasks).map((task, index) => (
           <div key={index} className={styles["task-card"]}>
-            <h3>{task.title}</h3>
-            <p><strong>Description:</strong> {task.description}</p>
-            <p><strong>Due Date:</strong> {task.dueDate}</p>
+            <h3>{task.projectTitle}</h3>
+            <p><strong>Description:</strong> {task.projectDescription}</p>
+            <p><strong>Due Date:</strong> {task.projectDate}</p>
             <p><strong>Priority:</strong> {task.priority}</p>
             <p><strong>Number of Tasks:</strong> {task.numberOfTasks}</p>
 
@@ -196,7 +240,7 @@ function Task() {
             </button>
             <button
               className={styles["delete-btn"]}
-              onClick={() => handleDelete(index)}
+              onClick={() => handleDelete(task.projectId)}
             >
               Delete
             </button>
