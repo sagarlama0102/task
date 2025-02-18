@@ -23,6 +23,7 @@ function Task() {
       setTasks(response.data.data);
     } catch (error) {
       console.error("Error fetching tasks:", error);
+      toast.error("Error fetching project!");
     }
   };
 
@@ -42,17 +43,20 @@ function Task() {
           priority: data.priority
         };
         await axios.put(`${API.BASE_URL}/api/project/${currentTaskId}`, updateData);
+        toast.success("Project Updated successfully!");
         setIsUpdateMode(false);
         setCurrentTaskId(null);
       } else {
         // Add new task - send data directly as it was working before
         await axios.post(`${API.BASE_URL}/api/project/`, data);
+        toast.success("Project created successfully!");
       }
       fetchTasks(); // Refresh task list
       reset();
       setShowForm(false);
     } catch (error) {
       console.error("Error submitting form:", error);
+      toast.error("Error submitting form!");
     }
   };
 
@@ -61,8 +65,10 @@ function Task() {
     try {
       await axios.delete(`${API.BASE_URL}/api/project/${id}`);
       fetchTasks(); // Refresh task list
+      toast.success("Project deleted successfully!");
     } catch (error) {
       console.error("Error deleting task:", error);
+      toast.error("Error deleting project!");
       
     }
   };
