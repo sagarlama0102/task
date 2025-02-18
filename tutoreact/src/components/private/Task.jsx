@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import styles from "./Task.module.css"; // Import the CSS module
 import { API } from "../../environment";
+import { toast } from "react-toastify";
 
 function Task() {
   const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm();
@@ -62,6 +63,7 @@ function Task() {
       fetchTasks(); // Refresh task list
     } catch (error) {
       console.error("Error deleting task:", error);
+      
     }
   };
 
