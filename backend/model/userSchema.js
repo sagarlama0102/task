@@ -26,7 +26,7 @@ const Users = sequelize.define("users", {
 (async()=>{
     try{
         await Users.sync();
-        console.log("users table has been created");
+        // console.log("users table has been created");
     }catch(error){
         console.log("Error: ", error.message);
     }

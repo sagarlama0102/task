@@ -1,0 +1,120 @@
+.profile-card {
+    max-width: 600px;
+    width: 90%;
+    margin: 20px auto;
+    padding: 40px;
+    background-color: #f1f8ff;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    font-family: 'Poppins', sans-serif;
+    transition: transform 0.3s ease;
+  }
+  
+  .profile-card:hover {
+    transform: translateY(-10px);
+  }
+  
+  .profile-image-container {
+    text-align: center;
+    margin-bottom: 30px;
+    position: relative;
+  }
+  
+  .profile-image {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #ddd;
+    transition: border-color 0.3s ease;
+  }
+  
+  .profile-image-container input[type="file"] {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    width: 180px;
+    height: 180px;
+    cursor: pointer;
+  }
+  
+  .profile-image-container input[type="file"]:hover + .profile-image {
+    border-color: #aaa;
+  }
+  
+  .profile-info {
+    margin-bottom: 30px;
+  }
+  
+  .profile-field {
+    margin-bottom: 25px;
+  }
+  
+  .profile-field label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: bold;
+    font-size: 16px;
+  }
+  
+  .profile-field input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 18px;
+    transition: border-color 0.3s ease;
+  }
+  
+  .profile-field input:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+  
+  .update-button {
+    width: 100%;
+    padding: 14px;
+    background-color: #095cb5;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+  
+  .update-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+  }
+  
+  /* Responsive adjustments for smaller screens */
+  @media (max-width: 768px) {
+    .profile-card {
+      padding: 30px;
+    }
+  
+    .profile-image {
+      width: 150px;
+      height: 150px;
+    }
+  
+    .profile-image-container input[type="file"] {
+      width: 150px;
+      height: 150px;
+    }
+  
+    .profile-field input {
+      font-size: 16px;
+      padding: 10px;
+    }
+  
+    .update-button {
+      font-size: 18px;
+      padding: 12px;
+    }
+  }
+  
