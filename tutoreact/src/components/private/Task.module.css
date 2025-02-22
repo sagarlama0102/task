@@ -74,6 +74,8 @@
 .task-section {
   position: relative;
   padding: 20px;
+  background-color: #b5d6ff;
+  height: 100vh;
 }
 
 .header {
@@ -221,6 +223,9 @@
     padding: 15px;
     width: 70%;
     /* max-width: 90%; */
+  }
+  .task-section{
+    height: 100%;
   }
 
   .add-project-btn {

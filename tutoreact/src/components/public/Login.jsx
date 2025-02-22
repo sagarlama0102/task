@@ -37,7 +37,9 @@ const Login = () => {
 
                 // Check if access_token exists inside response.data
                 if (response.data && response.data.data.access_token) {
-                    // console.log("Access Token:", response.data.data.access_token);
+                  //login token extra code 
+                    console.log("Access Token:", response.data.data.access_token);
+                  //
                     localStorage.setItem("token", response.data.data.access_token); // Store Token
                     toast.success("Login successful");
                     navigate("/DashboardLayout");

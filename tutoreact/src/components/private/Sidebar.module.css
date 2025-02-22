@@ -21,6 +21,9 @@ body {
   left: 0;
   top: 0;
   transition: width 0.3s ease;
+ 
+
+  
 }
 
 .sidebarContent {
@@ -43,6 +46,11 @@ body {
 
 .sidebarItem:hover {
   background-color: #b8d8f8;
+  border-radius: 12px;
+  color: #095cb5;
+}
+.sidebarItem:active {
+  background-color: #9acaff; /* Change this color to your desired active color */
   border-radius: 12px;
   color: #095cb5;
 }
@@ -71,7 +79,7 @@ body {
     width: 70px;
   }
 
-  /* .sidebar-item span {
+  .sidebar-item span {
     display: none;
-  } */
+  }
 }

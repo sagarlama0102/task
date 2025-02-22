@@ -1,33 +1,90 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import style from "./Profile.module.css";
+import axios from 'axios';
 
 const ProfileCard = () => {
-  const [username, setUsername] = useState("JohnDoe");
-  const [email, setEmail] = useState("john@example.com");
-  const [avatar, setAvatar] = useState(null);
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handleImageChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      // Create a temporary URL for the selected image file
-      setAvatar(URL.createObjectURL(e.target.files[0]));
+  useEffect(() => {
+    // Function to fetch the current user's data
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem('access_token'); // Assuming the token is stored in localStorage
+        console.log('Retrieved token:', token); // Log the token to verify it is retrieved correctly
+
+        if (!token) {
+          throw new Error('No token found');
+        }
+
+        const response = await axios.get('/api/auth/init', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (response.status === 201) {
+          setUsername(response.data.data.username);
+          setEmail(response.data.data.email);
+        } else {
+          throw new Error('Failed to fetch user data');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setError(error.message || 'Failed to fetch user data. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  const handleUpdate = async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        throw new Error('No token found');
+      }
+
+      const response = await axios.put('/api/users/update', { username, email }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (response.status === 200) {
+        alert('User credentials updated successfully!');
+      } else {
+        throw new Error('Failed to update user data');
+      }
+    } catch (error) {
+      console.error('Error updating user data:', error);
+      alert('Failed to update user data. Please try again later.');
     }
   };
 
-  const handleUpdate = () => {
-    // Here you would typically send the updated credentials to your backend
-    alert('User credentials updated!');
-  };
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div className={style["error-message"]}>{error}</div>;
+  }
 
   return (
+    <div className={style["profile-outlet"]}>
     <div className={style["profile-card"]}>
       <div className={style["profile-image-container"]}>
-        <img 
+        {/* <img 
           src={avatar || "https://via.placeholder.com/150"} 
           alt="Avatar" 
           className={style["profile-image"]} 
-        />
+        /> */}
         {/* Invisible file input placed over the image to allow clicking */}
-        <input type="file" onChange={handleImageChange} />
+        {/* <input type="file" onChange={handleImageChange} /> */}
       </div>
       <div className={style["profile-info"]}>
         <div className={style["profile-field"]}>
@@ -52,6 +109,7 @@ const ProfileCard = () => {
       <button className={style["update-button"]} onClick={handleUpdate}>
         Update
       </button>
+    </div>
     </div>
   );
 };
