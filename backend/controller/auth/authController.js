@@ -35,16 +35,32 @@ const login = async (req, res) => {
  *  init
  */
 
+// const init = async (req, res) => {
+//   try {
+//     const user = req.user.user;
+//     delete user.password;
+//     res
+//       .status(201)
+//       .send({ data: user, message: "successfully fetched current user" });
+//   } catch (e) {
+//     console.log(e);
+//     res.status(500).json({ error: "Failed to fetch users" });
+//   }
+// };
+
 const init = async (req, res) => {
   try {
-    const user = req.user.user;
-    delete user.password;
-    res
-      .status(201)
-      .send({ data: user, message: "successfully fetched current user" });
+      if (!req.user) {
+          return res.status(401).send({ message: "Unauthorized" });
+      }
+      const user = req.user;
+      delete user.password;
+      res
+          .status(201)
+          .send({ data: user, message: "successfully fetched current  user" });
   } catch (e) {
-    console.log(e);
-    res.status(500).json({ error: "Failed to fetch users" });
+      console.log(e);
+      res.status(500).json({ error: "Failed to fetch users" });
   }
 };
 
