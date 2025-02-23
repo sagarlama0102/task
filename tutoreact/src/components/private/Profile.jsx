@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import style from "./Profile.module.css";
 import axios from 'axios';
+import { API } from '../../environment';
+import { toast } from 'react-toastify';
 
 const ProfileCard = () => {
   const [username, setUsername] = useState("");
@@ -11,28 +13,39 @@ const ProfileCard = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const token = localStorage.getItem('token'); // Assuming the token is stored in localStorage
-        console.log('Retrieved token:', token); // Log the token to verify it is retrieved correctly
-
+        const token = localStorage.getItem('token');
+        
         if (!token) {
           throw new Error('No token found');
         }
 
-        const response = await axios.get('/api/auth/init', {
+        // First, decode the token to get initial user data
+        const tokenData = JSON.parse(atob(token.split('.')[1]));
+        const userData = tokenData.user;
+        
+        // Set initial values from token
+        if (userData) {
+          setUsername(userData.username || '');
+          setEmail(userData.email || '');
+        }
+
+        // Then fetch fresh data from server
+        const response = await axios.get(`${API.BASE_URL}/api/auth/init`, {
           headers: {
-            Authorization: `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
           }
         });
 
-        if (response.status === 200) { // Changed to 200 for consistency
-          setUsername(response.data.data);
-          setEmail(response.data.data);
-        } else {
-          throw new Error('Failed to fetch user data');
+        if (response.data && response.data.data) {
+          const freshUserData = response.data.data;
+          setUsername(freshUserData.username || userData.username || '');
+          setEmail(freshUserData.email || userData.email || '');
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
         setError(error.message || 'Failed to fetch user data. Please try again later.');
+        toast.error('Error loading profile data');
       } finally {
         setLoading(false);
       }
@@ -43,25 +56,29 @@ const ProfileCard = () => {
 
   const handleUpdate = async () => {
     try {
-      const token = localStorage.getItem('token'); // Ensure the same token is used
+      const token = localStorage.getItem('token');
       if (!token) {
         throw new Error('No token found');
       }
 
-      const response = await axios.put('/api/users/update', { username, email }, {
-        headers: {
-          Authorization: `Bearer ${token}`
+      const response = await axios.put(`${API.BASE_URL}/api/users/update`, 
+        { username, email },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         }
-      });
+      );
 
       if (response.status === 200) {
-        alert('User credentials updated successfully!');
+        toast.success('Profile updated successfully!');
       } else {
         throw new Error('Failed to update user data');
       }
     } catch (error) {
       console.error('Error updating user data:', error);
-      alert('Failed to update user data. Please try again later.');
+      toast.error('Failed to update profile. Please try again.');
     }
   };
 
@@ -114,4 +131,3 @@ const ProfileCard = () => {
 };
 
 export default ProfileCard;
-
