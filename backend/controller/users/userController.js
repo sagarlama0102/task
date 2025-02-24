@@ -29,7 +29,11 @@ const update = async (req, res) => {
     try {
         const userId = req.params.id;
         const body = req.body;
-
+        // additional code 
+        if (body.password) {
+            body.password = await bcrypt.hash(body.password, 10);
+          }
+        //
         const user = await userSchema.update(body, {
             where: { userId: userId }
         });

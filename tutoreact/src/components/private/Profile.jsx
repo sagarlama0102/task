@@ -5,6 +5,7 @@ import { API } from '../../environment';
 import { toast } from 'react-toastify';
 
 const ProfileCard = () => {
+  const [userId, setUserId] = useState(""); // Add userId state
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(true);
@@ -25,6 +26,7 @@ const ProfileCard = () => {
         
         // Set initial values from token
         if (userData) {
+          setUserId(userData.userId); // Set userId
           setUsername(userData.username || '');
           setEmail(userData.email || '');
         }
@@ -39,6 +41,7 @@ const ProfileCard = () => {
 
         if (response.data && response.data.data) {
           const freshUserData = response.data.data;
+          setUserId(freshUserData.userId); // Set userId
           setUsername(freshUserData.username || userData.username || '');
           setEmail(freshUserData.email || userData.email || '');
         }
@@ -53,34 +56,6 @@ const ProfileCard = () => {
 
     fetchUserData();
   }, []);
-
-  const handleUpdate = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No token found');
-      }
-
-      const response = await axios.put(`${API.BASE_URL}/api/users/update`, 
-        { username, email },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      if (response.status === 200) {
-        toast.success('Profile updated successfully!');
-      } else {
-        throw new Error('Failed to update user data');
-      }
-    } catch (error) {
-      console.error('Error updating user data:', error);
-      toast.error('Failed to update profile. Please try again.');
-    }
-  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -110,6 +85,7 @@ const ProfileCard = () => {
               id="username" 
               value={username} 
               onChange={(e) => setUsername(e.target.value)} 
+              readOnly // Make the input read-only
             />
           </div>
           <div className={style["profile-field"]}>
@@ -119,12 +95,10 @@ const ProfileCard = () => {
               id="email" 
               value={email} 
               onChange={(e) => setEmail(e.target.value)} 
+              readOnly // Make the input read-only
             />
           </div>
         </div>
-        <button className={style["update-button"]} onClick={handleUpdate}>
-          Update
-        </button>
       </div>
     </div>
   );
